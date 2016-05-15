@@ -23,29 +23,38 @@ class Greeting extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <ToolbarAndroid
-                        title={this.props.title}
-                        navIcon={require('image!ic_arrow_back_white_24dp')}
-                        onIconClicked={this.props.navigator.pop}
-                        titleColor={'#FFFFFF'}/>
         <Text style={styles.welcome}>
           Welcome to 500px Image Gallery!
         </Text>
         <View style = {styles.buttonView}>
-          <TouchableHighlight style = {styles.button} underlayColor='#99d9f4'>
+          <TouchableHighlight 
+            style = {styles.button} 
+            underlayColor='#99d9f4'
+            onPress ={() => this.goToGallery()}>
             <Text style = {styles.buttonText}>Want to see it! </Text>
           </TouchableHighlight>
         </View>
       </View>
     );
   }
+  goToGallery() {
+    this.props.navigator.push({
+      name:'Gallery',
+      id: 'gallery'
+    })
+  }
+  onBack(){
+    if (route.id) {
+        this.props.navigator.pop();
+    }
+  } 
 }
 
 class Navigation extends Component{ //PropertyFinderApp 
   render() {
     return (
         <Navigator
-          initialRoute={{name: 'Hello!', id: 'gallery'}}
+          initialRoute={{name: 'Hello!', id: 'greeting'}}
           renderScene={this.navigatorRenderScene}/>
     );
   }
@@ -56,12 +65,18 @@ class Navigation extends Component{ //PropertyFinderApp
                           title = 'Home'/>);
       case 'gallery':
         return (<Gallery navigator = {navigator}
-                          title = 'Gallery'/>);
+                          title = 'Gallery' 
+                          onBack={() => {
+                            if (route.index > 0) {
+                              navigator.pop();
+                            }
+                          }} />
+                );
     }
-      
-  }
   }
 
+
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
