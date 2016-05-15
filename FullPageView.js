@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 import React, { Component } from 'react';
 import {
   AppRegistry,
@@ -7,6 +7,7 @@ import {
   View,
   Image,
   ListView,
+  TouchableHighlight,
 } from 'react-native'
 
 import Dimensions from 'Dimensions';
@@ -14,16 +15,59 @@ import Dimensions from 'Dimensions';
 var _height = Dimensions.get('window').height;
 var _width = Dimensions.get('window').width;
 
+var URL = function(id) {
+    return 'https://api.500px.com/v1/photos/' + id + '?consumer_key=wB4ozJxTijCwNuggJvPGtBGCRqaZVcF6jsrzUadF&size3'
+}
 class FullPageView extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            loaded: false,
+            url: '',
+        };
+    }
+    componentDidMount(){
+        this.fetchPhoto(this.props.image_id);
+    }
+    fetchPhoto(id) {
+        fetch(URL(id))
+            .then((response) => response.json())
+            .then((responseData) => {
+                this.setState({
+                    loaded: true,
+                    url: responseData.photo.image_url,
+                });
+            })
+            .done();
+        }
     render() {
-        var photo = this.props.photo;
+        if (!this.state.loaded) {
+            return this.renderLoadingView();
+        }
         return (
-            <View style = {styles.container}>
-                <Image 
-                    style = {styles.image}
-                    source = {photo.image_url} />
+            <TouchableHighlight onPress ={() => this.goToGallery()}>
+                <View style = {styles.container}>
+                    <Image 
+                        style = {styles.image}
+                        source = {{uri:this.state.url}} />
+                </View>
+            </TouchableHighlight>
+          );
+    }
+    renderLoadingView() {
+        return (
+            <View>
+                <Text style = {styles.loadingText}>
+                    Big picture is being loaded... {this.image}
+                </Text>
             </View>
-            )
+            );
+    }
+    goToGallery() {
+        this.props.navigator.push({
+            name:'Gallery',
+            id: 'gallery'
+    })
     }
 }
 
@@ -33,8 +77,13 @@ class FullPageView extends Component {
     },
     image: {
         width: _height,
-        height: _width
-  },
+        height: _height
+    },
+    loadingText: {
+        marginTop: 100,
+        fontSize: 20,
+        textAlign: 'center',
+    },
 })
 
 module.exports = FullPageView;

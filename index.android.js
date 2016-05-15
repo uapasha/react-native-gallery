@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 
 var Gallery = require('./Gallery');
+var FullPageView = require('./FullPageView')
 
 class Greeting extends Component {
   render() {
@@ -60,22 +61,32 @@ class Navigation extends Component{ //PropertyFinderApp
   }
   navigatorRenderScene(route, navigator) {
     switch(route.id){
-      case 'greeting':
-        return (<Greeting navigator = {navigator}
-                          title = 'Home'/>);
-      case 'gallery':
-        return (<Gallery navigator = {navigator}
-                          title = 'Gallery' 
-                          onBack={() => {
-                            if (route.index > 0) {
-                              navigator.pop();
-                            }
-                          }} />
+        case 'greeting':
+            return (<Greeting 
+                        navigator = {navigator}
+                        title = 'Home'/>);
+        case 'gallery':
+            return (<Gallery 
+                        navigator = {navigator}
+                        title = 'Gallery' 
+                        onBack={() => {
+                            console.log('Back!')
+                            navigator.pop();
+                        }} />
+            );
+        default:
+            if ((route.id).indexOf('fullScreen') > -1) {
+                var image_id =(route.id).split('_')[1]
+                return (<FullPageView 
+                            navigator = {navigator}
+                            title= 'FullPageView'
+                            image_id = {image_id}/>
                 );
+            } else {
+                return (<Text>Something went wrong! {(route.id).indexOf('fullScreen')}</Text>)
+            }
     }
   }
-
-
 }
 const styles = StyleSheet.create({
   container: {
@@ -94,12 +105,6 @@ const styles = StyleSheet.create({
     marginBottom: 120,
     marginTop: 120,
   },
-  text: {
-    color: 'black',
-    backgroundColor: 'white',
-    fontSize: 30,
-    margin: 80,
-  },
   buttonText: {
     fontSize: 28,
     color: 'white',
@@ -117,5 +122,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
 });
+
 
 AppRegistry.registerComponent('ImageGallery', () => Navigation);
