@@ -1,10 +1,4 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- */
-
 'use strict';
-
 import React, { Component } from 'react';
 import {
   AppRegistry,
@@ -17,39 +11,46 @@ import {
   ToolbarAndroid,
 } from 'react-native';
 
+// import created modules
 var Gallery = require('./Gallery');
 var FullPageView = require('./FullPageView')
+
+////////////// MAIN COMPONENT //////////////
 
 class Greeting extends Component {
   render() {
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
-          Welcome to 500px Image Gallery!
+            Welcome to 500px Image Gallery!
         </Text>
-        <View style = {styles.buttonView}>
-          <TouchableHighlight 
-            style = {styles.button} 
-            underlayColor='#99d9f4'
-            onPress ={() => this.goToGallery()}>
-            <Text style = {styles.buttonText}>Want to see it! </Text>
-          </TouchableHighlight>
-        </View>
+            <View style = {styles.buttonView}>
+                <TouchableHighlight 
+                style = {styles.button} 
+                underlayColor='#99d9f4'
+                onPress ={() => this.goToGallery()}>
+                    <Text style = {styles.buttonText}>Want to see it! </Text>
+                </TouchableHighlight>
+            </View>
       </View>
     );
   }
+  // navigation call
   goToGallery() {
     this.props.navigator.push({
       name:'Gallery',
       id: 'gallery'
     })
   }
+  // trying t implement back handling but haven't yet succed
   onBack(){
     if (route.id) {
         this.props.navigator.pop();
     }
   } 
 }
+
+////////////// NAVIGATOR //////////////
 
 class Navigation extends Component{ //PropertyFinderApp 
   render() {
@@ -76,6 +77,7 @@ class Navigation extends Component{ //PropertyFinderApp
             );
         default:
             if ((route.id).indexOf('fullScreen') > -1) {
+                // get id of photo that were clicked
                 var image_id =(route.id).split('_')[1]
                 return (<FullPageView 
                             navigator = {navigator}
@@ -83,11 +85,15 @@ class Navigation extends Component{ //PropertyFinderApp
                             image_id = {image_id}/>
                 );
             } else {
-                return (<Text>Something went wrong! {(route.id).indexOf('fullScreen')}</Text>)
+                return (<Text>
+                        Something went wrong! {route.id}
+                        </Text>)
             }
     }
   }
 }
+
+////////////// STYLES //////////
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -123,5 +129,5 @@ const styles = StyleSheet.create({
   },
 });
 
-
+// register app
 AppRegistry.registerComponent('ImageGallery', () => Navigation);

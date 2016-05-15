@@ -12,18 +12,25 @@ import {
 
 import Dimensions from 'Dimensions';
 
+////////////// CONSTANTS and PARAMETERS //////////////
+
 var _height = Dimensions.get('window').height;
 var _width = Dimensions.get('window').width;
+
+////////////// HELPERS FUNCTIONS ///////////////////
 
 var URL = function(id) {
     return 'https://api.500px.com/v1/photos/' + id + '?consumer_key=wB4ozJxTijCwNuggJvPGtBGCRqaZVcF6jsrzUadF&size3'
 }
+
+////////////// MAIN COMPONENT //////////////
+
 class FullPageView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            loaded: false,
-            url: '',
+            loaded: false, // for tracking initial load
+            url: '', // add state var for keeping url of an image
         };
     }
     componentDidMount(){
@@ -35,16 +42,22 @@ class FullPageView extends Component {
             .then((responseData) => {
                 this.setState({
                     loaded: true,
-                    url: responseData.photo.image_url,
+                    url: responseData.photo.image_url, // get url
                 });
             })
+            .catch(error =>
+                this.setState({
+                    message: 'Something went wrong ' + error
+                }))
             .done();
         }
     render() {
         if (!this.state.loaded) {
+            // display nice message while image is loading
             return this.renderLoadingView();
         }
         return (
+            // click on image and go back to Gallery (well allmost back)
             <TouchableHighlight onPress ={() => this.goToGallery()}>
                 <View style = {styles.container}>
                     <Image 
@@ -58,7 +71,7 @@ class FullPageView extends Component {
         return (
             <View>
                 <Text style = {styles.loadingText}>
-                    Big picture is being loaded... {this.image}
+                    Big picture is being loaded...
                 </Text>
             </View>
             );
@@ -71,7 +84,10 @@ class FullPageView extends Component {
     }
 }
 
-  var styles = StyleSheet.create({
+
+////////////// STYLES //////////
+
+const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
@@ -86,4 +102,5 @@ class FullPageView extends Component {
     },
 })
 
+//export module
 module.exports = FullPageView;

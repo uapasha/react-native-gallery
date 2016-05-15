@@ -12,19 +12,29 @@ import {
 
 import Dimensions from 'Dimensions';
 
+// import FullPageView module
+var FullPageView = require('./FullPageView')
+
+////////////// CONSTANTS and PARAMETERS //////////////
+
 // setting size of pictures loaded for tumbnails. see for reference:
 // https://github.com/500px/api-documentation/blob/master/basics/formats_and_terms.md#image-urls-and-image-sizes
-var IMAGE_SIZE = 31
+const IMAGE_SIZE = 31
+
+// set width and height for tumbnail pictures
+var _height = (Dimensions.get('window').height)/2 - 100;
+var _width = (Dimensions.get('window').width)/2-10;
+
+////////////// HELPERS FUNCTIONS ///////////////////
 
 // get url based on page number
 var URL = function(page, imageSize = IMAGE_SIZE){
-  return 'https://api.500px.com/v1/photos?feature=popular&image_size[]=' + imageSize + '&consumer_key=wB4ozJxTijCwNuggJvPGtBGCRqaZVcF6jsrzUadF&page=' + page;
+  return 'https://api.500px.com/v1/photos?feature=popular&image_size[]=' +
+  	imageSize+'&consumer_key=wB4ozJxTijCwNuggJvPGtBGCRqaZVcF6jsrzUadF&page='+
+  	page;
 }
 
-var _height = (Dimensions.get('window').height)/2 - 10;
-var _width = (Dimensions.get('window').width)/2 - 100;
-
-var FullPageView = require('./FullPageView')
+////////////// MAIN COMPONENT //////////////
 
 class Gallery extends Component{
 	constructor(props) {
@@ -33,30 +43,40 @@ class Gallery extends Component{
 			dataSource: new ListView.DataSource({
 				rowHasChanged: (row1, row2) => row1 !== row2,
 			}),
-			loaded: false,
-			loadingMore: false,
+			loaded: false, // for tracking initial load
+			loadingMore: false, // for tracking load more
 		};
 	}
 	componentDidMount(){
 		this._photos = []
-		this.page = 1
+		this.page = 1 // set initial page that will be loaded
 		this.fetchPhotos(this.page);
 	}
 	fetchPhotos(page) {
 		fetch(URL(page))
 			.then((response) => response.json())
 			.then((responseData) => {
+				// load new bunch of photos
 				var newPhotos = responseData.photos
+				// add new photos to existing list
 				this._photos = this._photos.concat(newPhotos)
+				// increment page for next load
 				this.page +=1;
 				this.setState({
-					dataSource: this.state.dataSource.cloneWithRows(this._photos),
-					loaded: true,
+					dataSource: 
+						this.state.dataSource.cloneWithRows(this._photos),
+					loaded: 
+						true,
 				});
 			})
+			.catch(error =>
+			    this.setState({
+			    	message: 'Something went wrong ' + error
+			    }))
 			.done();
 	}
 	render(){
+		// while image is loading show a message
 		if (!this.state.loaded) {
 			return this.renderLoadingView();
 		}
@@ -65,24 +85,26 @@ class Gallery extends Component{
 			<ListView 
 				contentContainerStyle={styles.list}
 				initialListSize={20}
-				pageSize={2}
 				dataSource = {this.state.dataSource}
 				renderRow = {this.renderPhoto.bind(this)}
 				scrollRenderAheadDistance={1500}
 				onEndReached = {this._onEndReached.bind(this)}
+				onEndReachedThreshold = {300}
 				style = {styles.listView} />
 			);
 	}
 	_onEndReached() {
 		console.log('onEndReached');
+
 		if (this.state.loadingMore) {
+			// if we already loading - do nothing
 			return;
 		}
 
 		this.setState({
 			loadingMore: false
 		});
-
+		// load more photos
 		this.fetchPhotos(this.page);
 	}
 	renderLoadingView() {
@@ -96,6 +118,7 @@ class Gallery extends Component{
 	}
 	renderPhoto(photo) {
 		return (
+			// when pressed render foolscreen photo
 			<TouchableHighlight onPress ={() => this.imagePressed(photo.id)}>
 				<View>
 					<Image 
@@ -107,15 +130,14 @@ class Gallery extends Component{
 	}
 	imagePressed(photoId){
 		this.props.navigator.push({
-		title: "FullPageView",
-		id: 'fullScreen_' + photoId,
-  });
-		
+			title: "FullPageView",
+			id: 'fullScreen_' + photoId, // pass id of an image to navigator
+  		});
 	}
+}   
 
-	}   
-
-var styles = StyleSheet.create({
+////////////// STYLES //////////
+const styles = StyleSheet.create({
 	list : {
 		justifyContent: 'space-around',
 		flexDirection: 'row',
@@ -137,4 +159,6 @@ var styles = StyleSheet.create({
 		textAlign: 'center',
 	},
 });
+
+// export module
 module.exports = Gallery;
